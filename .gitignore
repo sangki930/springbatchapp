@@ -1,0 +1,17 @@
+.gradle
+build
+out
+.idea
+.vscode
+*.iml
+*.iws
+*.ipr
+bin
+/out/
+.DS_Store
+application.properties
+# Except application.properties if you want to keep its structure, 
+# but usually it might contain sensitive info. 
+# For this example, I'll include it but maybe rename to application.properties.example later.
+# Actually, I'll allow application.properties for now since it doesn't have secrets.
+!src/main/resources/application.properties
