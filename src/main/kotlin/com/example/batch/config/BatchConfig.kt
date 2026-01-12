@@ -3,6 +3,7 @@ package com.example.batch.config
 import com.example.batch.domain.Person
 import com.example.batch.domain.PersonRepository
 import com.example.batch.processor.PersonItemProcessor
+import java.time.LocalDate
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.job.builder.JobBuilder
@@ -15,19 +16,23 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.transaction.PlatformTransactionManager
 
+// Batch 설정
 @Configuration
-class BatchConfig(
-    private val personRepository: PersonRepository
-) {
+class BatchConfig(private val personRepository: PersonRepository) {
 
     @Bean
     fun personItemReader(): ItemReader<Person> {
+        val now = LocalDate.now()
         return ListItemReader(
-            listOf(
-                Person(name = "alice", age = 20),
-                Person(name = "bob", age = 25),
-                Person(name = "charlie", age = 30)
-            )
+                listOf(
+                        Person(name = "alice", age = 20, lastConsentDate = now.minusYears(2)),
+                        Person(name = "bob", age = 25, lastConsentDate = now.minusMonths(6)),
+                        Person(
+                                name = "charlie",
+                                age = 30,
+                                lastConsentDate = now.minusYears(1).minusDays(1)
+                        )
+                )
         )
     }
 
@@ -38,31 +43,24 @@ class BatchConfig(
 
     @Bean
     fun personItemWriter(): ItemWriter<Person> {
-        return ItemWriter { items ->
-            personRepository.saveAll(items)
-        }
+        return ItemWriter { items -> personRepository.saveAll(items) }
     }
 
     @Bean
     fun importUserStep(
-        jobRepository: JobRepository,
-        transactionManager: PlatformTransactionManager
+            jobRepository: JobRepository,
+            transactionManager: PlatformTransactionManager
     ): Step {
         return StepBuilder("importUserStep", jobRepository)
-            .chunk<Person, Person>(10, transactionManager)
-            .reader(personItemReader())
-            .processor(personItemProcessor())
-            .writer(personItemWriter())
-            .build()
+                .chunk<Person, Person>(10, transactionManager)
+                .reader(personItemReader())
+                .processor(personItemProcessor())
+                .writer(personItemWriter())
+                .build()
     }
 
     @Bean
-    fun importUserJob(
-        jobRepository: JobRepository,
-        importUserStep: Step
-    ): Job {
-        return JobBuilder("importUserJob", jobRepository)
-            .start(importUserStep)
-            .build()
+    fun importUserJob(jobRepository: JobRepository, importUserStep: Step): Job {
+        return JobBuilder("importUserJob", jobRepository).start(importUserStep).build()
     }
 }

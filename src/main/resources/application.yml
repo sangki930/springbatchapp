@@ -22,3 +22,6 @@ spring:
     jdbc:
       # 스프링 배치 실행에 필요한 메타데이터 테이블을 항상 초기화/생성
       initialize-schema: always
+    job:
+      # 여러 개의 Job이 정의되어 있을 경우 실행할 기본 Job 이름 지정
+      name: privacyConsentJob
