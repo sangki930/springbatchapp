@@ -2,9 +2,9 @@ package com.example.batch
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.scheduling.annotation.EnableScheduling
 
-@SpringBootApplication
-class BatchApplication
+@EnableScheduling @SpringBootApplication class BatchApplication
 
 fun main(args: Array<String>) {
     runApplication<BatchApplication>(*args)
